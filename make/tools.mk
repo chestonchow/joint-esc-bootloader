@@ -35,7 +35,20 @@ MCU_NOBUILD:=V203
 else
 # assume Linux
 OSDIR:=linux
-ARM_SDK_PREFIX:=tools/linux/xpack-arm-none-eabi-gcc-10.3.1-2.3/bin/arm-none-eabi-
+# Check for system ARM GCC toolchain first, then fall back to bundled
+ifeq ($(shell which arm-none-eabi-gcc 2>/dev/null),)
+  # arm-none-eabi-gcc not found, try arm-zephyr-eabi-gcc
+  ifeq ($(shell which arm-zephyr-eabi-gcc 2>/dev/null),)
+    # Neither found, use bundled toolchain
+    ARM_SDK_PREFIX:=tools/linux/xpack-arm-none-eabi-gcc-10.3.1-2.3/bin/arm-none-eabi-
+  else
+    # Use Zephyr ARM GCC
+    ARM_SDK_PREFIX:=arm-zephyr-eabi-
+  endif
+else
+  # Use system arm-none-eabi-gcc
+  ARM_SDK_PREFIX:=arm-none-eabi-
+endif
 CP:=cp
 DSEP:=/
 NUL:=/dev/null
